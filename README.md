@@ -1,9 +1,9 @@
-## `DroneCI` with `Gitea` for `golang` project
+## `DroneCI` with `Git` for `golang` project
 
-使用`Gitea`和`DroneCI`为 `golang` 项目打造的 `devops` 项目模版。
+使用`Git`和`DroneCI`为 `golang` 项目打造的 `devops` 项目模版。
 
 特点：
-1. `Gitea` 开源的 git 仓库系统，使用 `ssh` 方式进行 `clone`，需要在 `gitea` 的仓库配置 `ssh` 部署密钥；
+1. `Git` 开源的版本控制系统，使用 `ssh` 方式进行 `clone`，需要在 `git` 的仓库配置 `ssh` 部署密钥；
 2. `DroneCI` 是用 `golang` 开发轻量级 `CI/CD` 工具;
 3. 已经为 `golang` 项目进行流程定制，方便扩展使用;
 4. 提供基础 `Dockerfile` 对 `golang` 程序打包发布 `Docker` 镜像;
