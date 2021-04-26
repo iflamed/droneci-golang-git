@@ -67,3 +67,6 @@ ENTRYPOINT ["/bin/test"]
 8. `GOPROXY`, `Golang` 的依赖代理配置;
 9. `DINGTALK_TOKEN`, `Dingtalk` 的群 `bot` 消息 `token`;(`notification step` 使用)
 10. `DINGTALK_SECRET`, `Dingtalk` 的群 `bot` 消息 `secret`;(`notification step` 使用)
+11. `PORTAINER_URL`, `Portainer` 服务的 `API` 地址，例如: `https://portainer.example.com`;
+12. `PORTAINER_USERNAME`, `Portainer` 服务中具有发布服务权限的账号的用户名;
+13. `PORTAINER_PASSWORD`, `Portainer` 服务中具有发布服务权限的账号的密码;

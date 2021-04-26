@@ -1,0 +1,11 @@
+version: '3.3'
+
+services:
+  testgo:
+    image: "${DOCKER_REPO}:${DOCKER_TAG}"
+    deploy:
+      mode: global
+      restart_policy:
+        condition: none
+      placement:
+        constraints: [node.platform.os == linux]
