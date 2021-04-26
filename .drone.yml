@@ -28,7 +28,7 @@ steps:
   - |
     [[ -z "$${SSH_PORT}" ]] && [[ -n "$${SSH_HOST}" ]] && ssh-keyscan $${SSH_HOST} >> $HOME/.ssh/known_hosts
   - git clone ${DRONE_GIT_SSH_URL} .
-  - git checkout ${DRONE_COMMIT_BRANCH}
+  - git checkout -b drone-pipeline ${DRONE_COMMIT}
 
 - name: linter
   image: golangci/golangci-lint:latest-alpine
@@ -122,7 +122,7 @@ steps:
     [[ -z "$${SSH_PORT}" ]] && [[ -n "$${SSH_HOST}" ]] && ssh-keyscan $${SSH_HOST} >> $HOME/.ssh/known_hosts
   - git clone ${DRONE_GIT_SSH_URL} .
   - git fetch --tags
-  - git checkout ${DRONE_TAG}
+  - git checkout -b drone-pipeline ${DRONE_TAG}
 
 - name: linter
   image: golangci/golangci-lint:latest-alpine
@@ -225,7 +225,7 @@ steps:
   - |
     [[ -z "$${SSH_PORT}" ]] && [[ -n "$${SSH_HOST}" ]] && ssh-keyscan $${SSH_HOST} >> $HOME/.ssh/known_hosts
   - git clone ${DRONE_GIT_SSH_URL} .
-  - git checkout ${DRONE_COMMIT_BRANCH}
+  - git checkout -b drone-pipeline ${DRONE_COMMIT}
 
 - name: linter
   image: golangci/golangci-lint:latest-alpine
