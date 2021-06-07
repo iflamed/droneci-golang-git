@@ -3,6 +3,7 @@
 使用`Git`和`DroneCI`为 `golang` 项目打造的 `devops` 项目模版。
 
 特点：
+
 1. `Git` 开源的版本控制系统，使用 `ssh` 方式进行 `clone`，需要在 `git` 的仓库配置 `ssh` 部署密钥；
 2. `DroneCI` 是用 `golang` 开发轻量级 `CI/CD` 工具;
 3. 已经为 `golang` 项目进行流程定制，方便扩展使用;
@@ -10,6 +11,7 @@
 5. `DroneCI` build 结束之后，自动发送钉钉提醒。
 
 ### `Dockerfile` 配置参考
+
 > 我们将 `alpine` linux 系统的软件源替换为清华大学的镜像地址。（！！阿里云的 alpine 镜像测试出现404问题）。
 
 ```dockerfile
@@ -21,11 +23,14 @@ ENTRYPOINT ["/bin/test"]
 ```
 
 ### DroneCI 的 `.drone.yml` 配置解析
-仓库中 `.drone.yml` 提供了3个 `pipeline`，分别是 `default`, `tag`, `promote`，所有的 `pipeline`, 均需要运行在 `docker` 中。
-3个 `pipeline` 对应场景:
+
+仓库中 `.drone.yml` 提供了3个 `pipeline`，分别是 `default`, `tag`, `promote`，所有的 `pipeline`, 均需要运行在 `docker` 中。 3个 `pipeline` 对应场景:
+
 1. `default` 为默认场景，适合 `master` 和 `develop` 分支在被 `push` 之后进行 `golangci-lint`、 `test` (单元测试) 和 `build`;
-2. `tag` 应用在 `git` 仓库创建 `tag` 的场景，`git` 创建 `tag` 之后，将会依次自动进行 `golangci-lint`, `test`, `build`, `publish`(发布 `docker` 镜像);
-3. `promote` 是在`DroneCI`的后台`promote`之后，将会依次自动进行 `golangci-lint`, `test`, `build`, `publish`(发布 `docker` 镜像)，你可以在 `publish` 后面增加 `step` 进行 `deploy`;
+2. `tag` 应用在 `git` 仓库创建 `tag` 的场景，`git` 创建 `tag` 之后，将会依次自动进行 `golangci-lint`, `test`, `build`, `publish`(发布 `docker` 镜像)
+   ;
+3. `promote` 是在`DroneCI`的后台`promote`之后，将会依次自动进行 `golangci-lint`, `test`, `build`, `publish`(发布 `docker` 镜像)
+   ，你可以在 `publish` 后面增加 `step` 进行 `deploy`;
 
 #### `pipeline` 流程结构
 
@@ -34,6 +39,7 @@ ENTRYPOINT ["/bin/test"]
 ├── default
 │   ├── clone
 │   ├── linter
+│   ├── review(Gitea PullRequests Only)
 │   ├── test
 │   ├── build
 │   └── notification
@@ -55,6 +61,7 @@ ENTRYPOINT ["/bin/test"]
 ```
 
 ### `DroneCI` 配置 `secrets` 变量说明
+
 > 此仓库中 `.drone.yml` 文件配置的 `pipeline` 正确运行，需要配置以下 `secrets` 变量。
 
 1. `SSH_HOST`, `git` 仓库的 `ssh` `clone` 地址的 `IP` 或者域名, 例如: `1.2.3.4`, `gitea.example.com`, `github.com`;(`clone step` 使用)
@@ -67,3 +74,6 @@ ENTRYPOINT ["/bin/test"]
 8. `GOPROXY`, `Golang` 的依赖代理配置;
 9. `DINGTALK_TOKEN`, `Dingtalk` 的群 `bot` 消息 `token`;(`notification step` 使用)
 10. `DINGTALK_SECRET`, `Dingtalk` 的群 `bot` 消息 `secret`;(`notification step` 使用)
+11. `GITEA_URL`, `GITEA_URL` 是`Gitea`仓库的地址，例如:`https://git.example.com`, 末尾不需要`/`; (`review step` 使用)
+12. `GITEA_CI_USER`, `GITEA_CI_USER` 是`Gitea`仓库的用户名，例如:`gitea`, 需要有对应仓库的 `read` 权限; (`review step` 使用)
+13. `GITEA_CI_TOKEN`, `GITEA_CI_TOKEN` 是`Gitea`仓库用户的访问 `Token`, 需要有对应仓库的 `read` 权限; (`review step` 使用)

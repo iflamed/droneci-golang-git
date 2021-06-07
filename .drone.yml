@@ -40,7 +40,28 @@ steps:
     - name: deps
       path: /go
   commands:
-    - golangci-lint run
+    - golangci-lint run | tee .golangci-lint.log
+    - |
+      [[ -z "$${DRONE_PULL_REQUEST}" ]] && [[ -s .golangci-lint.log ]] && exit 1
+    - exit 0
+
+- name: review
+  image: newbing/gitea-golangci-lint:latest
+  pull: if-not-exists
+  environment:
+    GITEA_URL:
+      from_secret: GITEA_URL
+    GITEA_USER:
+      from_secret: GITEA_CI_USER
+    GITEA_TOKEN:
+      from_secret: GITEA_CI_TOKEN
+  commands:
+    - export GIT_REPO=$DRONE_REPO
+    - export PULL_REQUEST=$DRONE_PULL_REQUEST
+    - cat .golangci-lint.log | gitea
+  when:
+    event:
+    - pull_request
 
 - name: test
   image: golang:latest
@@ -134,7 +155,10 @@ steps:
     - name: deps
       path: /go
   commands:
-    - golangci-lint run
+    - golangci-lint run | tee .golangci-lint.log
+    - |
+      [[ -s .golangci-lint.log ]] && exit 1
+    - exit 0
 
 - name: test
   image: golang:latest
@@ -237,7 +261,10 @@ steps:
     - name: deps
       path: /go
   commands:
-    - golangci-lint run
+    - golangci-lint run | tee .golangci-lint.log
+    - |
+      [[ -s .golangci-lint.log ]] && exit 1
+    - exit 0
 
 - name: test
   image: golang:latest
@@ -302,5 +329,65 @@ steps:
 trigger:
   event:
     - promote
+  target:
+    - production
+
+---
+kind: pipeline
+type: docker
+name: rollback
+
+clone:
+  disable: true
+
+volumes:
+- name: deps
+  temp: {}
+
+steps:
+- name: clone
+  image: alpine/git
+  pull: if-not-exists
+  environment:
+    SSH_KEY:
+      from_secret: SSH_KEY
+    SSH_HOST:
+      from_secret: SSH_HOST
+    SSH_PORT:
+      from_secret: SSH_PORT
+  commands:
+  - mkdir $HOME/.ssh && echo "$SSH_KEY" > $HOME/.ssh/id_rsa && chmod 600 $HOME/.ssh/id_rsa
+  - |
+    [[ -n "$${SSH_PORT}" ]] && [[ -n "$${SSH_HOST}" ]] && ssh-keyscan -p $${SSH_PORT} $${SSH_HOST} >> $HOME/.ssh/known_hosts
+  - |
+    [[ -z "$${SSH_PORT}" ]] && [[ -n "$${SSH_HOST}" ]] && ssh-keyscan $${SSH_HOST} >> $HOME/.ssh/known_hosts
+  - git clone ${DRONE_GIT_SSH_URL} .
+  - git checkout -b drone-pipeline ${DRONE_TAG}
+
+# 可以根据自己的实际项目情况，完成部署上线的 step
+#- name: deploy
+#  image: user/repo
+# deploy step placeholder
+
+- name: notification
+  image: lddsb/drone-dingtalk-message
+  pull: if-not-exists
+  settings:
+    token:
+      from_secret: DINGTALK_TOKEN
+    type: markdown
+    secret:
+      from_secret: DINGTALK_SECRET
+    sha_link: true
+    message_color: true
+    message_pic: true
+  when:
+    status:
+      - success
+      - failure
+
+trigger:
+  event:
+    - rollback
   target:
     - production
